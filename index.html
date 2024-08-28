@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student ID Card</title>
+    <style>
+        @font-face {
+            font-family: 'moul';
+            src: url('fonts/KhmerOS_muollight.ttf');
+        }
+
+        @font-face {
+            font-family: 'content';
+            src: url('fonts/KhmerOS_siemreap.ttf');
+        }
+
+        body {
+            font-family: 'content', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+            font-size: 18px;
+        }
+
+        .card {
+            width: 330px;
+            height: 550px;
+            background-color: #fff;
+            text-align: center;
+            border: 1px solid #000;
+            box-sizing: border-box;
+            position: relative;
+            background-color: #f4f4f9;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            height: 2.5cm;
+            background-color: #f9b233;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        .card-header img {
+            height: 1.5cm;
+        }
+
+        .scname {
+            font-family: 'moul', sans-serif;
+            color: #034ea1;
+            font-size: 12px;
+            line-height: 2;
+            margin: 0;
+        }
+
+        .cardtitle {
+            font-family: 'moul', sans-serif;
+            font-size: 14px;
+            color: #034ea1;
+        }
+
+        .schoolY {
+            font-family: 'content', sans-serif;
+            font-size: 9px;
+            color: black;
+            margin: 0;
+        }
+
+        .card-photo img {
+            width: 2.2cm;
+            height: 2.8cm;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .card-info {
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .card-info p {
+            margin: 2px 0;
+        }
+
+        .card-footer {
+            position: absolute;
+            bottom: 0.3cm;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 6px;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .stamp {
+            width: 3.5cm;
+            height: auto;
+        }
+
+        .qr-code {
+            width: 1.5cm;
+            height: auto;
+        }
+
+        .footer-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding-left:20px;
+            padding-right: 20px;
+        }
+        .stuName{
+            font-family: 'moul';
+            font-weight: normal;
+        }
+        @media print {
+            .card {
+                background-color: #f4f4f9 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card" id="studentCard">
+    <div class="card-header">
+        <img class="imglogo" src="scLogo.png" alt="School Logo">
+        <p class="scname">សាលាបឋមសិក្សាសម្ដេចព្រះរាជអគ្គមហេសី<br>នរោត្តមមុនីនាថសីហនុ</p>
+        
+    </div>
+    <h3 class="cardtitle">បណ្ណសម្គាល់ខ្លួនសិស្ស</h3>
+    <p class="schoolY">ឆ្នាំសិក្សា ២០២៤-២០២៥</p>
+    <h3 id="studentName" class="stuName"></h3>
+
+    <div class="card-photo">
+        <img id="studentPhoto" alt="Student Photo">
+    </div>
+
+    <div class="card-info">
+        <p id="studentGender"></p>
+        <p id="studentGrade"></p>
+        <p id="studentPhone"></p>
+        <p id="studentID"></p>
+    </div>
+
+    <div class="card-footer">
+        
+        <div class="footer-item">
+            <img src="" alt="QR Code" class="qr-code" id="qrCode">
+            <p>Scan for Info</p>
+        </div>
+        <div class="footer-item">
+            <img src="stamp1.png" alt="Stamp" class="stamp">
+            <p></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const studentID = urlParams.get('id');
+
+    const apiEndpoint = 'https://sheets.googleapis.com/v4/spreadsheets/1cCYn1f2ODBi8HCFYPJrFL5i-gd55ozvDKlaLaYYLnv4/values/Sheet1?key=AIzaSyCVySc4qfLSCIelBrcqvdhoxGWWezmUd2g';
+
+    fetch(apiEndpoint)
+        .then(response => response.json())
+        .then(data => {
+            const rows = data.values;
+            const headers = rows[0];
+            const studentRow = rows.find(row => row[headers.indexOf('ID')] === studentID);
+
+            if (studentRow) {
+                const student = {};
+                headers.forEach((header, index) => {
+                    student[header] = studentRow[index];
+                });
+
+                document.getElementById('studentName').innerText = student.Name;
+                document.getElementById('studentGender').innerText = `ភេទ: ${student.Gender}`;
+                document.getElementById('studentGrade').innerText = `ថ្នាក់ទី: ${student.Grade}`;
+                document.getElementById('studentPhone').innerText = `ទូរស័ព្ទ: ${student.Phone}`;
+                document.getElementById('studentPhoto').src = student.Photo;
+                document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${window.location.href}`;
+            } else {
+                document.getElementById('studentCard').innerHTML = '<p>ទិន្នន័យសិស្សរកមិនឃើញទេ!</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            document.getElementById('studentCard').innerHTML = '<p>មិនអាចដំណើរការបាន សូមពិនិត្យអ៊ីនធឺណិតលោកអ្នក</p>';
+        });
+</script>
+
+</body>
+</html>
